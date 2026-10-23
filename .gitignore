@@ -1,0 +1,25 @@
+# Local submission notes
+submission_notes.md
+
+# Python caches and test artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Local environments and secrets
+.env
+.env.*
+.venv/
+venv/
+
+# OS and editor files
+.DS_Store
+.idea/
+.vscode/
+
+# Logs
+*.log

@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "weight_policy": {
+    "version": 1,
+    "basis": "business_priority",
+    "core_min_share": 0.5
+  },
+  "gate_tests": [
+    "test_outputs.py::test_gate_controllers_stay_below_overshoot_envelope"
+  ],
+  "tests": {
+    "test_outputs.py::test_eight_valves_are_paired_to_hidden_zones": {
+      "weight": 0.105,
+      "priority": "core",
+      "rationale": "八阀阶跃试验恢复匿名阀区对应，是楼控热区能够独立控制的起点。"
+    },
+    "test_outputs.py::test_ten_valve_pairing_preserves_unique_channels": {
+      "weight": 0.105,
+      "priority": "core",
+      "rationale": "十阀一对一映射检验改造规模扩大后仍不会把两个热区接到同一执行器。"
+    },
+    "test_outputs.py::test_step_response_fit_recovers_gain_and_time_constant": {
+      "weight": 0.105,
+      "priority": "core",
+      "rationale": "阶跃增益和时间常数决定控制器的稳态供给与响应速度，必须按模型辨识。"
+    },
+    "test_outputs.py::test_sixty_second_sampling_boundary_is_accepted": {
+      "weight": 0.105,
+      "priority": "core",
+      "rationale": "六十秒采样是现场楼控网关的公开边界，允许通过关系到历史数据试点。"
+    },
+    "test_outputs.py::test_pi_gains_settle_each_zone_before_deadline": {
+      "weight": 0.105,
+      "priority": "core",
+      "rationale": "每个热区都须在约定时间内进入窄带，直接对应夜间值班的舒适度承诺。"
+    },
+    "test_outputs.py::test_identical_valve_responses_report_ambiguity": {
+      "weight": 0.08,
+      "priority": "boundary",
+      "rationale": "两个阀响应完全相同时必须停止发布配对，避免错误控制造成区域过冷。"
+    },
+    "test_outputs.py::test_sixty_one_second_sampling_is_refused": {
+      "weight": 0.08,
+      "priority": "boundary",
+      "rationale": "超过公开采样上限的数据会破坏离散控制节拍，应在辨识前直接拒收。"
+    },
+    "test_outputs.py::test_extra_top_level_key_is_refused": {
+      "weight": 0.08,
+      "priority": "schema",
+      "rationale": "热区对象只允许规定字段，可阻止旧版楼层编码混入当前映射语义。"
+    },
+    "test_outputs.py::test_success_output_is_compact_sorted_and_newline_terminated": {
+      "weight": 0.08,
+      "priority": "supporting",
+      "rationale": "稳定结果字节便于楼控配置按版本审计阀区映射和增益变更。"
+    },
+    "test_outputs.py::test_ambient_at_setpoint_is_refused": {
+      "weight": 0.075,
+      "priority": "boundary",
+      "rationale": "环境温度等于设定值会消除可辨识的升温空间，必须在热模型拟合前拒收。"
+    },
+    "test_outputs.py::test_zero_step_magnitude_is_refused": {
+      "weight": 0.08,
+      "priority": "schema",
+      "rationale": "零阶跃幅值没有可观测激励，若被接受会伪造零增益或无意义的整定结果。"
+    }
+  }
+}
