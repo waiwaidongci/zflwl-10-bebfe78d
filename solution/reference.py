@@ -101,6 +101,8 @@ def parse_payload(path: Path) -> dict[str, Any]:
             raise Refused("valve ids must be unique")
         valve_ids.add(valve_id)
         start = _number(item.get("step_start_min"), "step_start_min")
+        if start < 0.0:
+            raise Refused("step_start_min must be nonnegative")
         magnitude = _number(
             item.get("step_magnitude"), "step_magnitude", positive=True
         )

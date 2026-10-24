@@ -19,7 +19,8 @@
 
 `actuator_tests` 的数量与热区相同，每项只能含 `actuator_id`、`step_start_min`、
 `step_magnitude`、`samples`。阀号写成 `VALVE-[A-Z0-9]{3}`，不许重号；阶跃开始时间
-是有限的非负数，阶跃幅值为正有限数。
+必须有限且不小于 0，其中 0 表示试验开始时立即施加阶跃，负值必须拒收；阶跃幅值为
+正有限数。
 
 每个 `samples` 项只能含 `sensor_id`、`temperatures`，并覆盖全部传感器。温度序列固定
 121 点，采样间隔为 `sample_seconds`。每个阀只驱动一个热区，其他热区的温度保持

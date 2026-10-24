@@ -9,3 +9,6 @@ RUN apk add --no-cache \
 WORKDIR /app
 RUN mkdir -p /logs/verifier
 COPY app /app
+
+# Stable verifier interpreter path (the verifier is invoked with -S -P -B).
+RUN ln -sf /usr/bin/python3 /usr/local/bin/python3

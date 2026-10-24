@@ -11,12 +11,22 @@ from pathlib import Path
 
 ENTRY = os.environ.get("HVAC_IDENTIFIER", "/app/identify_hvac.py")
 
+SAFE_ENV = {
+    "PATH": "/usr/bin:/bin",
+    "HOME": "/tmp",
+    "LANG": "C.UTF-8",
+    "LC_ALL": "C.UTF-8",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PYTHONHASHSEED": "0",
+}
+
 
 def _run(payload: Path, output: Path) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        [sys.executable, ENTRY, str(payload), str(output)],
+        [sys.executable, "-S", "-P", "-B", ENTRY, str(payload), str(output)],
         text=True,
         capture_output=True,
+        env=SAFE_ENV,
         timeout=30,
         check=False,
     )
@@ -30,7 +40,11 @@ def _plant(index: int) -> tuple[float, float]:
     return 1.55 + 0.13 * index, 11.0 + 1.15 * index
 
 
-def _payload(zone_count: int = 10, sample_seconds: int = 30) -> tuple[dict[str, object], dict[str, str], dict[str, dict[str, float]]]:
+def _payload(
+    zone_count: int = 10,
+    sample_seconds: int = 30,
+    step_start: float = 10.0,
+) -> tuple[dict[str, object], dict[str, str], dict[str, dict[str, float]]]:
     zones = [
         {
             "zone_id": f"ZONE-{index:02d}Q",
@@ -41,7 +55,6 @@ def _payload(zone_count: int = 10, sample_seconds: int = 30) -> tuple[dict[str, 
     ]
     order = [(index * 3 + 1) % zone_count for index in range(zone_count)]
     dt_minutes = sample_seconds / 60.0
-    step_start = 10.0
     magnitude = 2.0 + 0.15 * (zone_count - 8)
     tests = []
     expected_pairing: dict[str, str] = {}
@@ -218,6 +231,43 @@ def test_step_response_fit_recovers_gain_and_time_constant(tmp_path: Path) -> No
     assert completed.returncode == 0
     assert abs(observed["VALVE-00V"]["gain_c_per_unit"] - expected["VALVE-00V"]["gain_c_per_unit"]) < 1e-5
     assert abs(observed["VALVE-06V"]["tau_minutes"] - expected["VALVE-06V"]["tau_minutes"]) < 1e-5, "CASE-REC-01 CASE-IDS-02 CASE-ACT-02 CASE-SAMPLE-02 CASE-OUT-04"
+
+
+def test_zero_step_start_is_accepted(tmp_path: Path) -> None:
+    """题面：
+    「阶跃开始时间必须有限且不小于 0，其中 0 表示试验开始时立即施加阶跃，负值必须拒收」
+    """
+
+    # CASE-VALVE-04
+    payload, expected, _ = _payload(8, step_start=0.0)
+    source = tmp_path / "input.json"
+    output = tmp_path / "result.json"
+    _write_json(source, payload)
+    completed = _run(source, output)
+    result = json.loads(output.read_text(encoding="utf-8"))
+    assert payload["actuator_tests"][0]["step_start_min"] == 0.0
+    assert completed.returncode == 0
+    assert completed.stdout == ""
+    assert completed.stderr == ""
+    assert result["pairing"] == expected
+
+
+def test_negative_step_start_is_refused(tmp_path: Path) -> None:
+    """题面：
+    「阶跃开始时间必须有限且不小于 0，其中 0 表示试验开始时立即施加阶跃，负值必须拒收」
+    """
+
+    # CASE-VALVE-05
+    payload, _, _ = _payload(8)
+    payload["actuator_tests"][0]["step_start_min"] = -0.01
+    source = tmp_path / "input.json"
+    output = tmp_path / "result.json"
+    _write_json(source, payload)
+    completed = _run(source, output)
+    assert completed.returncode == 2
+    assert completed.stdout == ""
+    assert completed.stderr.startswith("REFUSED: ")
+    assert not output.exists()
 
 
 def test_sixty_second_sampling_boundary_is_accepted(tmp_path: Path) -> None:

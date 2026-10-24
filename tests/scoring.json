@@ -35,34 +35,44 @@
       "rationale": "每个热区都须在约定时间内进入窄带，直接对应夜间值班的舒适度承诺。"
     },
     "test_outputs.py::test_identical_valve_responses_report_ambiguity": {
-      "weight": 0.08,
+      "weight": 0.07,
       "priority": "boundary",
       "rationale": "两个阀响应完全相同时必须停止发布配对，避免错误控制造成区域过冷。"
     },
     "test_outputs.py::test_sixty_one_second_sampling_is_refused": {
-      "weight": 0.08,
+      "weight": 0.075,
       "priority": "boundary",
       "rationale": "超过公开采样上限的数据会破坏离散控制节拍，应在辨识前直接拒收。"
     },
     "test_outputs.py::test_extra_top_level_key_is_refused": {
-      "weight": 0.08,
+      "weight": 0.075,
       "priority": "schema",
       "rationale": "热区对象只允许规定字段，可阻止旧版楼层编码混入当前映射语义。"
     },
     "test_outputs.py::test_success_output_is_compact_sorted_and_newline_terminated": {
-      "weight": 0.08,
+      "weight": 0.07,
       "priority": "supporting",
       "rationale": "稳定结果字节便于楼控配置按版本审计阀区映射和增益变更。"
     },
     "test_outputs.py::test_ambient_at_setpoint_is_refused": {
-      "weight": 0.075,
+      "weight": 0.07,
       "priority": "boundary",
       "rationale": "环境温度等于设定值会消除可辨识的升温空间，必须在热模型拟合前拒收。"
     },
     "test_outputs.py::test_zero_step_magnitude_is_refused": {
-      "weight": 0.08,
+      "weight": 0.075,
       "priority": "schema",
       "rationale": "零阶跃幅值没有可观测激励，若被接受会伪造零增益或无意义的整定结果。"
+    },
+    "test_outputs.py::test_zero_step_start_is_accepted": {
+      "weight": 0.02,
+      "priority": "boundary",
+      "rationale": "零分钟开始是公开允许的立即阶跃边界，必须进入正常辨识流程。"
+    },
+    "test_outputs.py::test_negative_step_start_is_refused": {
+      "weight": 0.02,
+      "priority": "boundary",
+      "rationale": "负开始时间无法对应已记录试验，必须在辨识前按坏件拒收。"
     }
   }
 }
