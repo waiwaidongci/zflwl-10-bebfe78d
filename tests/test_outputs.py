@@ -218,7 +218,7 @@ def test_ten_valve_pairing_preserves_unique_channels(tmp_path: Path) -> None:
 
 def test_step_response_fit_recovers_gain_and_time_constant(tmp_path: Path) -> None:
     """题面：
-    「`controller_spec` 只能含 `setpoint_c`、`overshoot_limit_c`、`settle_minutes`、」
+    「单热区模型为 `dT/dt = (gain_c_per_unit * u - (T - ambient_c)) / tau_minutes`。」
     """
 
     payload, _, expected = _payload(8)
@@ -272,7 +272,7 @@ def test_negative_step_start_is_refused(tmp_path: Path) -> None:
 
 def test_sixty_second_sampling_boundary_is_accepted(tmp_path: Path) -> None:
     """题面：
-    「输入顶层只能是 `schema`、`sample_seconds`、`zones`、`actuator_tests`、」
+    「`sample_seconds` 是 10 到 60 的整数。」
     """
 
     payload, expected, _ = _payload(8, 60)
@@ -288,7 +288,7 @@ def test_sixty_second_sampling_boundary_is_accepted(tmp_path: Path) -> None:
 
 def test_identical_valve_responses_report_ambiguity(tmp_path: Path) -> None:
     """题面：
-    「`python3 /app/identify_hvac.py <input.json> <output.json>` 运行。成功时不向标准输出或」
+    「若两个阀的响应在数值上完全相同，阀区对应关系不唯一。」
     """
 
     payload = _duplicated_response_payload()
@@ -305,7 +305,7 @@ def test_identical_valve_responses_report_ambiguity(tmp_path: Path) -> None:
 
 def test_sixty_one_second_sampling_is_refused(tmp_path: Path) -> None:
     """题面：
-    「`actuator_tests` 的数量与热区相同，每项只能含 `actuator_id`、`step_start_min`、」
+    「`sample_seconds` 是 10 到 60 的整数。」
     """
 
     payload, _, _ = _payload(8)
@@ -322,7 +322,7 @@ def test_sixty_one_second_sampling_is_refused(tmp_path: Path) -> None:
 
 def test_ambient_at_setpoint_is_refused(tmp_path: Path) -> None:
     """题面：
-    「121 点，采样间隔为 `sample_seconds`。每个阀只驱动一个热区，其他热区的温度保持」
+    「四个值均为正有限数，其中环境温度低于设定值。」
     """
 
     # CASE-AC-03
@@ -347,8 +347,7 @@ def test_ambient_at_setpoint_is_refused(tmp_path: Path) -> None:
 
 def test_zero_step_magnitude_is_refused(tmp_path: Path) -> None:
     """题面：
-    「每个 `samples` 项只能含 `sensor_id`、`temperatures`，并覆盖全部传感器。温度序列固定」
-    「`integral` 以分钟为单位累加误差，`u` 限制在 0 到 `max_supply_c`。整定后温度不得超过」
+    「阶跃开始时间必须有限且不小于 0，其中 0 表示试验开始时立即施加阶跃，负值必须拒收；阶跃幅值为」
     """
 
     # CASE-VALVE-03
@@ -370,7 +369,7 @@ def test_zero_step_magnitude_is_refused(tmp_path: Path) -> None:
 
 def test_extra_top_level_key_is_refused(tmp_path: Path) -> None:
     """题面：
-    「`gain_c_per_unit` 与 `tau_minutes`，`controller_gains` 只含 `kp` 与 `ki`。」
+    「输入顶层只能是 `schema`、`sample_seconds`、`zones`、`actuator_tests`、」
     """
 
     # CASE-AC-01 HVAC-FAIL-03 HVAC-FAIL-04
@@ -387,7 +386,7 @@ def test_extra_top_level_key_is_refused(tmp_path: Path) -> None:
 
 def test_success_output_is_compact_sorted_and_newline_terminated(tmp_path: Path) -> None:
     """题面：
-    「拒绝坏件时不生成任何结果文件；标准错误保留一行，开头为 `REFUSED: `，退出码为 2。」
+    「磁盘上的结果去掉空白，键字母升序，行尾补换行。」
     """
 
     payload, _, _ = _payload(8)
@@ -404,7 +403,7 @@ def test_success_output_is_compact_sorted_and_newline_terminated(tmp_path: Path)
 
 def test_pi_gains_settle_each_zone_before_deadline(tmp_path: Path) -> None:
     """题面：
-    「`SENS-[A-Z0-9]{3}`，两者都不得重号；环境温度是有限数。」
+    「并须在 `settle_minutes` 内进入设定值上下」
     """
 
     payload, _, _ = _payload(10)
@@ -420,7 +419,7 @@ def test_pi_gains_settle_each_zone_before_deadline(tmp_path: Path) -> None:
 
 def test_gate_controllers_stay_below_overshoot_envelope(tmp_path: Path) -> None:
     """题面：
-    「若两个阀的响应在数值上完全相同，阀区对应关系不唯一。此时结果只能包含 `status` 与」
+    「整定后温度不得超过」
     """
 
     payload, _, _ = _payload(10)

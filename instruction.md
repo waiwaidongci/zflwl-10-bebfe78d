@@ -18,8 +18,7 @@
 `SENS-[A-Z0-9]{3}`，两者都不得重号；环境温度是有限数。
 
 `actuator_tests` 的数量与热区相同，每项只能含 `actuator_id`、`step_start_min`、
-`step_magnitude`、`samples`。阀号写成 `VALVE-[A-Z0-9]{3}`，不许重号；阶跃开始时间
-必须有限且不小于 0，其中 0 表示试验开始时立即施加阶跃，负值必须拒收；阶跃幅值为
+`step_magnitude`、`samples`。阀号写成 `VALVE-[A-Z0-9]{3}`，不许重号；阶跃开始时间必须有限且不小于 0，其中 0 表示试验开始时立即施加阶跃，负值必须拒收；阶跃幅值为
 正有限数。
 
 每个 `samples` 项只能含 `sensor_id`、`temperatures`，并覆盖全部传感器。温度序列固定
